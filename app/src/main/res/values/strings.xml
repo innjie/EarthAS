@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">EarthAS</string>
+    <string name="tab_info">설명서</string>
+    <string name="tab_collection">일반 수거품</string>
+    <string name="tab_confusion">몰라</string>
+    <string name="tab_opened">열린 수거함</string>
+
+    <string name="title_general">일반쓰레기</string>
+    <string name="title_paper">종이</string>
+    <string name="title_can">캔 고철</string>
+    <string name="title_glass">유리 병</string>
+    <string name="title_plastic">플라스틱</string>
+    <string name="title_vinyl">비닐</string>
+</resources>

@@ -16,9 +16,11 @@ public class InfoFragment extends Fragment {
     private TextView tvInfoConfusion;
     private TextView tvInfoOpened;
 
+    private View root;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_info, container, false);
+        root = inflater.inflate(R.layout.fragment_info, container, false);
 
         tvInfoCollection = root.findViewById(R.id.text_info_collection);
         tvInfoConfusion = root.findViewById(R.id.text_info_confusion);

@@ -14,9 +14,11 @@ import ericson.lg.mobile.earthas.R;
 public class OpenedFragment extends Fragment {
     private Button btnAllClose;
 
+    private View root;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_opened, container, false);
+        root = inflater.inflate(R.layout.fragment_opened, container, false);
 
         btnAllClose = root.findViewById(R.id.button_allclose);
         btnAllClose.setOnClickListener(new Button.OnClickListener() {

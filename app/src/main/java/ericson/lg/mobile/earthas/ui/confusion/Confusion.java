@@ -4,6 +4,14 @@ public class Confusion {
     private String name;
     private String type;
 
+    public Confusion() {
+    }
+
+    public Confusion(String name, String type) {
+        this.name = name;
+        this.type = type;
+    }
+
     public String getName() {
         return name;
     }

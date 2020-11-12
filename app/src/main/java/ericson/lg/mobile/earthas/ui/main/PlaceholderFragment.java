@@ -25,6 +25,8 @@ public class PlaceholderFragment extends Fragment {
 
     private int index;
 
+    private View root;
+
     public static PlaceholderFragment newInstance(int index) {
         PlaceholderFragment fragment = new PlaceholderFragment();
         Bundle bundle = new Bundle();
@@ -50,7 +52,7 @@ public class PlaceholderFragment extends Fragment {
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
 
-        View root = null;
+        root = null;
 
         switch (index){
             case 0:

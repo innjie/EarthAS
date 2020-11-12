@@ -26,9 +26,11 @@ public class CollectionFragment extends Fragment {
 
     private String selectType;
 
+    private View root;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_collection, container, false);
+        root = inflater.inflate(R.layout.fragment_collection, container, false);
 
         btnOpen = root.findViewById(R.id.button_open);
         btnGeneral = root.findViewById(R.id.button_general);

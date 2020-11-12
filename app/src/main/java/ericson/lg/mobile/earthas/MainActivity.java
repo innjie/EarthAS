@@ -3,8 +3,6 @@ package ericson.lg.mobile.earthas;
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.amplifyframework.core.Amplify;
-import com.amplifyframework.datastore.generated.model.Confusion;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.viewpager.widget.ViewPager;
@@ -42,23 +40,6 @@ public class MainActivity extends AppCompatActivity  {
                 startActivity(intent);
             }
         });
-
-//        Confusion confusion = Confusion.builder()
-//                .name("뼈다귀")
-//                .type("general")
-//                .build();
-//
-//        Amplify.DataStore.save(
-//                confusion,
-//                success -> Log.i("Tutorial", "Saved item: " + success.item().getName()),
-//                error -> Log.e("Tutorial", "Could not save item to DataStore", error)
-//        );
-        Amplify.DataStore.observe(Confusion.class,
-                started -> Log.i("Tutorial", "Observation began."),
-                change -> Log.i("Tutorial", change.item().toString()),
-                failure -> Log.e("Tutorial", "Observation failed.", failure),
-                () -> Log.i("Tutorial", "Observation complete.")
-        );
 
     }
 

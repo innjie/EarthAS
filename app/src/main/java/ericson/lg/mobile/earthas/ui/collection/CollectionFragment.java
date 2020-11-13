@@ -1,16 +1,36 @@
 package ericson.lg.mobile.earthas.ui.collection;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+
+import javax.net.ssl.HttpsURLConnection;
+
 import ericson.lg.mobile.earthas.R;
+import ericson.lg.mobile.earthas.ui.opened.Opened;
+import ericson.lg.mobile.earthas.ui.opened.OpenedFragment;
 
 public class CollectionFragment extends Fragment {
     private Button btnOpen;
@@ -25,6 +45,7 @@ public class CollectionFragment extends Fragment {
     private TextView tvCollection;
 
     private String selectType;
+    private String body;
 
     private View root;
 
@@ -46,7 +67,7 @@ public class CollectionFragment extends Fragment {
         btnOpen.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                parsing();
             }
         });
 
@@ -199,5 +220,130 @@ public class CollectionFragment extends Fragment {
                     break;
             }
         }
+    }
+
+    void parsing() {
+        try {
+            String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_open) + "seoul";
+            new RestAPITask().execute(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    class RestAPITask extends AsyncTask<String, Void, String> {
+
+        //수행 전
+        @Override
+        protected void onPreExecute() {
+            try {
+                JSONObject json = new JSONObject();
+                json.put("type", selectType);
+                body = json.toString();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        protected String doInBackground(String... Strings) {
+            String result = null;
+
+            try {
+                result = downloadContents(Strings[0]);
+
+            }
+            catch (Exception e) {
+                // Error calling the rest api
+                Log.e("REST_API", "GET method failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+            return result;
+        }
+
+        //작업 완료
+        @Override
+        protected void onPostExecute(String result) {
+            Toast.makeText(root.getContext(), selectType + " box open success", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /* 주소(address)에 접속하여 문자열 데이터를 수신한 후 반환 */
+    protected String downloadContents(String address) {
+        HttpURLConnection conn = null;
+        InputStream stream = null;
+        String result = null;
+
+        try {
+            URL url = new URL(address);
+            conn = (HttpURLConnection)url.openConnection();
+            stream = getNetworkConnection(conn);
+            result = readStreamToString(stream);
+            if (stream != null) stream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        return result;
+    }
+
+    // URLConnection 을 전달받아 연결정보 설정 후 연결, 연결 후 수신한 InputStream 반환
+    private InputStream getNetworkConnection(HttpURLConnection conn) throws Exception {
+        // 클라이언트 아이디 및 시크릿 그리고 요청 URL 선언
+        conn.setRequestMethod("PUT");
+        conn.setConnectTimeout(5000);
+        conn.setReadTimeout(5000);
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Accept", "application/json");
+        conn.setRequestProperty("content-type", "application/json");
+
+        writeStream(conn);
+
+        if (conn.getResponseCode() != HttpsURLConnection.HTTP_OK) {
+            throw new IOException("HTTP error code: " + conn.getResponseCode());
+        }
+
+        return conn.getInputStream();
+    }
+
+    protected void writeStream(HttpURLConnection conn) {
+        try {
+            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+            wr.write(body); //json 형식의 메세지 전달
+            wr.flush();
+            wr.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* InputStream을 전달받아 문자열로 변환 후 반환 */
+    protected String readStreamToString(InputStream stream){
+        StringBuilder result = new StringBuilder();
+
+        try {
+            InputStreamReader inputStreamReader = new InputStreamReader(stream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            String readLine = bufferedReader.readLine();
+
+            while (readLine != null) {
+                result.append(readLine + "\n");
+                readLine = bufferedReader.readLine();
+            }
+
+            bufferedReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result.toString();
     }
 }

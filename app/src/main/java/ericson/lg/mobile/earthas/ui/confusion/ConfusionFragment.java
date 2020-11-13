@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -31,6 +33,8 @@ import ericson.lg.mobile.earthas.R;
 public class ConfusionFragment extends Fragment {
 
     private Button btnSearch;
+    private EditText etItem;
+    private String item;
 
     private RecyclerView recyclerConfusion;
     private LinearLayoutManager layoutManager;
@@ -52,11 +56,15 @@ public class ConfusionFragment extends Fragment {
 
         parsing();
 
+        etItem = root.findViewById(R.id.edit_item);
         btnSearch = root.findViewById(R.id.button_search);
         btnSearch.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
+                item = etItem.getText().toString();
+                Toast.makeText(getContext(), item, Toast.LENGTH_SHORT).show();
 
+                //parsing item find
             }
         });
 
@@ -65,7 +73,7 @@ public class ConfusionFragment extends Fragment {
 
     void parsing() {
         try {
-            new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_list));
+            //new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_list));
         } catch (Exception e) {
             e.printStackTrace();
         }

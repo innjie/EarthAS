@@ -30,7 +30,7 @@
                 android:layout_height="match_parent">
 
                 <Button
-                    android:id="@+id/button_general"
+                    android:id="@+id/button_garbage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@drawable/button_radius_sub"
@@ -48,8 +48,8 @@
                     android:text="종이"
                     android:textColor="@android:color/white"
                     app:layout_constraintEnd_toStartOf="@+id/button_plastic"
-                    app:layout_constraintStart_toEndOf="@+id/button_general"
-                    app:layout_constraintTop_toTopOf="@+id/button_general" />
+                    app:layout_constraintStart_toEndOf="@+id/button_garbage"
+                    app:layout_constraintTop_toTopOf="@+id/button_garbage" />
 
                 <Button
                     android:id="@+id/button_plastic"
@@ -60,7 +60,7 @@
                     android:textColor="@android:color/white"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/button_paper"
-                    app:layout_constraintTop_toTopOf="@+id/button_general" />
+                    app:layout_constraintTop_toTopOf="@+id/button_garbage" />
 
                 <Button
                     android:id="@+id/button_glass"
@@ -72,7 +72,7 @@
                     android:text="유리 병"
                     app:layout_constraintEnd_toStartOf="@+id/button_can"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/button_general" />
+                    app:layout_constraintTop_toBottomOf="@+id/button_garbage" />
 
                 <Button
                     android:id="@+id/button_can"

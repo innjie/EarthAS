@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -21,10 +22,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -43,6 +47,9 @@ public class OpenedFragment extends Fragment {
     private OpenedAdapter adapter;
 
     private View root;
+
+    private Boolean status;
+    private String body;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -63,7 +70,7 @@ public class OpenedFragment extends Fragment {
         btnAllClose.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //openList에 저장된 타입들 바디로
+                parsingClose();
             }
         });
 
@@ -72,8 +79,21 @@ public class OpenedFragment extends Fragment {
 
     void parsingStatus() {
         try {
+            status = true;
+
             //String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_status) + URLEncoder.encode(query, "UTF-8");
             String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_status) + "seoul";
+            new RestAPITask().execute(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void parsingClose() {
+        status = false;
+
+        try {
+            String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_close) + "seoul";
             new RestAPITask().execute(url);
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,6 +105,25 @@ public class OpenedFragment extends Fragment {
         //수행 전
         @Override
         protected void onPreExecute() {
+            if(!status){
+                try {
+                    //String[] array = new String[openList.size()];
+
+                    //for(int i=0; i<array.length; i++){
+                    //    array[i] = openList.get(i);
+                    //}
+
+                    //JSONObject json = new JSONObject();
+                    //json.put("type", array);
+                    //body = json.toString();
+                    //body="{\"type\":"+Arrays.toString(array)+"}";
+                    body="{\"type\":"+openList.toString()+"}";
+
+                    Log.d("bodyddddddd", body);
+                } catch (/*JSON*/Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         @Override
@@ -107,10 +146,17 @@ public class OpenedFragment extends Fragment {
         //작업 완료
         @Override
         protected void onPostExecute(String result) {
-            Log.d("parsing", result);
-            parse(result);
+            if(status){
+                Log.d("parsing", result);
+                parse(result);
 
-            adapter.notifyDataSetChanged();
+                adapter.notifyDataSetChanged();
+            } else {
+                adapter.removeAll();
+                adapter.notifyDataSetChanged();
+
+                Toast.makeText(root.getContext(), openList.toString() + " boxes close success", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -139,17 +185,38 @@ public class OpenedFragment extends Fragment {
     // URLConnection 을 전달받아 연결정보 설정 후 연결, 연결 후 수신한 InputStream 반환
     private InputStream getNetworkConnection(HttpURLConnection conn) throws Exception {
         // 클라이언트 아이디 및 시크릿 그리고 요청 URL 선언
-        conn.setRequestMethod("GET");
         conn.setConnectTimeout(5000);
         conn.setReadTimeout(5000);
         conn.setDoInput(true);
         conn.setRequestProperty("content-type", "application/json");
+
+        if(status){
+            conn.setRequestMethod("GET");
+        } else{
+            conn.setRequestMethod("PUT");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Accept", "application/json");
+
+            writeStream(conn);
+        }
 
         if (conn.getResponseCode() != HttpsURLConnection.HTTP_OK) {
             throw new IOException("HTTP error code: " + conn.getResponseCode());
         }
 
         return conn.getInputStream();
+    }
+
+    protected void writeStream(HttpURLConnection conn) {
+        try {
+            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+            wr.write(body); //json 형식의 메세지 전달
+            wr.flush();
+            wr.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /* InputStream을 전달받아 문자열로 변환 후 반환 */
@@ -181,7 +248,7 @@ public class OpenedFragment extends Fragment {
             JSONObject object = new JSONObject(json);
             JSONObject jsonOpened = object.getJSONObject("Item");
             Opened opened;
-            String[] typeName = {"general", "paper", "plastic", "can", "glass", "vinyl"};
+            String[] typeName = {"garbage", "paper", "plastic", "can", "glass", "vinyl"};
 
             openList = new ArrayList<>();
 

@@ -23,18 +23,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import ericson.lg.mobile.earthas.R;
-import ericson.lg.mobile.earthas.ui.opened.Opened;
-import ericson.lg.mobile.earthas.ui.opened.OpenedFragment;
 
 public class CollectionFragment extends Fragment {
     private Button btnOpen;
-    private Button btnGeneral;
+    private Button btnGarbage;
     private Button btnPaper;
     private Button btnGlass;
     private Button btnCan;
@@ -54,7 +50,7 @@ public class CollectionFragment extends Fragment {
         root = inflater.inflate(R.layout.fragment_collection, container, false);
 
         btnOpen = root.findViewById(R.id.button_open);
-        btnGeneral = root.findViewById(R.id.button_general);
+        btnGarbage = root.findViewById(R.id.button_garbage);
         btnPaper = root.findViewById(R.id.button_paper);
         btnGlass = root.findViewById(R.id.button_glass);
         btnCan = root.findViewById(R.id.button_can);
@@ -71,12 +67,12 @@ public class CollectionFragment extends Fragment {
             }
         });
 
-        btnGeneral.setOnClickListener(new Button.OnClickListener() {
+        btnGarbage.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 buttonChange(selectType);
-                btnGeneral.setBackgroundResource(R.drawable.button_radius_sub2);
-                selectType = "general";
+                btnGarbage.setBackgroundResource(R.drawable.button_radius_sub2);
+                selectType = "garbage";
 
                 tvCaution.setText(
                         "≡ 종량제 봉투에 담아 버려주세요\n" +
@@ -200,8 +196,8 @@ public class CollectionFragment extends Fragment {
     public void buttonChange(String selectType){
         if(selectType != null){
             switch (selectType){
-                case "general":
-                    btnGeneral.setBackgroundResource(R.drawable.button_radius_sub);
+                case "garbage":
+                    btnGarbage.setBackgroundResource(R.drawable.button_radius_sub);
                     break;
                 case "paper":
                     btnPaper.setBackgroundResource(R.drawable.button_radius_sub);

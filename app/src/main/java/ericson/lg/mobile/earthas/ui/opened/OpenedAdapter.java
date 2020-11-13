@@ -43,9 +43,13 @@ public class OpenedAdapter extends RecyclerView.Adapter<OpenedAdapter.ItemViewHo
         return openeds.size();
     }
 
-    void addItem(Opened opened) {
+    public void addItem(Opened opened) {
         // 외부에서 item을 추가시킬 함수입니다.
         openeds.add(opened);
+    }
+
+    public void removeAll(){
+        openeds.clear();
     }
 
     // RecyclerView의 핵심인 ViewHolder 입니다.

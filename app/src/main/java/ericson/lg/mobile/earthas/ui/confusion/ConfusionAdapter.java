@@ -44,6 +44,10 @@ public class ConfusionAdapter extends RecyclerView.Adapter<ConfusionAdapter.Item
         confusions.add(confusion);
     }
 
+    void clearItem(){
+        confusions.clear();
+    }
+
     // RecyclerView의 핵심인 ViewHolder 입니다.
     // 여기서 subView를 setting 해줍니다.
     class ItemViewHolder extends RecyclerView.ViewHolder {

@@ -41,6 +41,8 @@ public class ConfusionFragment extends Fragment {
 
     private ConfusionAdapter adapter;
 
+    private Boolean find;
+
     private View root;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -54,7 +56,7 @@ public class ConfusionFragment extends Fragment {
         adapter = new ConfusionAdapter();
         recyclerConfusion.setAdapter(adapter);
 
-        parsing();
+        parsingList();
 
         etItem = root.findViewById(R.id.edit_item);
         btnSearch = root.findViewById(R.id.button_search);
@@ -62,18 +64,29 @@ public class ConfusionFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 item = etItem.getText().toString();
-                Toast.makeText(getContext(), item, Toast.LENGTH_SHORT).show();
 
-                //parsing item find
+                parsingFind();
             }
         });
 
         return root;
     }
 
-    void parsing() {
+    void parsingList() {
+        find = false;
+
         try {
             new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_list));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void parsingFind() {
+        find = true;
+
+        try {
+            new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_find) + item);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -84,6 +97,7 @@ public class ConfusionFragment extends Fragment {
         //수행 전
         @Override
         protected void onPreExecute() {
+            adapter.clearItem();
         }
 
         @Override

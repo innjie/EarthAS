@@ -1,95 +1,73 @@
-//recycler 뷰 위한 어댑터
 
 package ericson.lg.mobile.earthas.ui.opened;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.util.Log;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
 import ericson.lg.mobile.earthas.R;
-import ericson.lg.mobile.earthas.ui.confusion.Confusion;
 
-public class OpenedAdapter extends RecyclerView.Adapter<OpenedAdapter.ItemViewHolder> {
+public class OpenedAdapter extends BaseAdapter {
 
-    private ArrayList<Opened> openeds = new ArrayList<>();
+    private LayoutInflater inflater;
+    private Context context;
+    private int layout;
+    private ArrayList<String> list;
 
-    private AlertDialog.Builder builder;
-
-    @NonNull
-    @Override
-    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_opened, parent, false);
-        return new ItemViewHolder(view);
+    public OpenedAdapter(Context context, int layout, ArrayList<String> list) {
+        this.context = context;
+        this.layout = layout;
+        this.list = list;
+        inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        holder.onBind(openeds.get(position));
+    public int getCount() {
+        return list.size();
     }
 
     @Override
-    public int getItemCount() {
-        return openeds.size();
+    public String getItem(int i) {
+        return list.get(i);
     }
 
-    public void addItem(Opened opened) {
-        // 외부에서 item을 추가시킬 함수입니다.
-        openeds.add(opened);
+    @Override
+    public long getItemId(int i) {
+        return 0;
     }
 
-    public void removeAll(){
-        openeds.clear();
-    }
+    @Override
+    public View getView(int i, View convertView, ViewGroup viewGroup) {
+        View view = convertView;
+        ViewHolder viewHolder = null;
 
-    // RecyclerView의 핵심인 ViewHolder 입니다.
-    // 여기서 subView를 setting 해줍니다.
-    class ItemViewHolder extends RecyclerView.ViewHolder {
-
-        private TextView tvType;
-
-        ItemViewHolder(View itemView) {
-            super(itemView);
-
-            tvType = itemView.findViewById(R.id.text_type);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //int pos = getAdapterPosition();
-
-                    builder = new AlertDialog.Builder(view.getContext());
-
-                    builder.setMessage(tvType.getText().toString() + " 닫기")
-                            .setCancelable(false)
-                            .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            })
-                            .setNegativeButton("취소", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-
-                                }
-                            }).show();
-                }
-            });
+        if (view == null) {
+            view = inflater.inflate(layout, viewGroup, false);
+            viewHolder = new ViewHolder();
+            viewHolder.tvType = view.findViewById(R.id.text_type);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder)view.getTag();
         }
 
-        void onBind(Opened opened) {
-            tvType.setText(opened.getType());
-        }
+        String type = list.get(i);
+
+        viewHolder.tvType.setText(type);
+
+        return view;
     }
+
+    public void setList(ArrayList<String> list) {
+        this.list = list;
+    }
+
+    static class ViewHolder {
+        public TextView tvType = null;
+    }
+
 }

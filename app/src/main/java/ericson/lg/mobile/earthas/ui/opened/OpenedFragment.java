@@ -1,12 +1,16 @@
 package ericson.lg.mobile.earthas.ui.opened;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,13 +27,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -40,9 +40,9 @@ public class OpenedFragment extends Fragment {
     private TextView tvRegion;
 
     private ArrayList<String> openList;
+    private ArrayList<String> selectList;
 
-    private RecyclerView recyclerOpened;
-    private LinearLayoutManager layoutManager;
+    private ListView lvOpened;
 
     private OpenedAdapter adapter;
 
@@ -51,18 +51,23 @@ public class OpenedFragment extends Fragment {
     private Boolean status;
     private String body;
 
+    private AlertDialog.Builder builder;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_opened, container, false);
 
         tvRegion = root.findViewById(R.id.text_region);
 
-        recyclerOpened = root.findViewById(R.id.recycler_opened);
-        layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        recyclerOpened.setLayoutManager(layoutManager);
+        builder = new AlertDialog.Builder(root.getContext());
 
-        adapter = new OpenedAdapter();
-        recyclerOpened.setAdapter(adapter);
+        lvOpened = root.findViewById(R.id.list_opened);
+
+        openList = new ArrayList<>();
+        selectList = new ArrayList<>();
+
+        adapter = new OpenedAdapter(root.getContext(), R.layout.list_opened, openList);
+        lvOpened.setAdapter(adapter);
 
         parsingStatus();
 
@@ -70,7 +75,48 @@ public class OpenedFragment extends Fragment {
         btnAllClose.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                parsingClose();
+                builder.setMessage("Do you want to close all boxes?")
+                        .setCancelable(false)
+                        .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                selectList.addAll(openList);
+                                openList.clear();
+                                parsingClose();
+                            }
+                        })
+                        .setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        }).show();
+            }
+        });
+
+        lvOpened.setOnItemClickListener(new ListView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String type = openList.get(i);
+
+                Log.d("clickkkkkkkkkkk", type);
+
+                builder.setMessage(type + " close")
+                        .setCancelable(false)
+                        .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                selectList.add(type);
+                                openList.remove(i);
+                                parsingClose();
+                            }
+                        })
+                        .setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        }).show();
             }
         });
 
@@ -117,7 +163,7 @@ public class OpenedFragment extends Fragment {
                     //json.put("type", array);
                     //body = json.toString();
                     //body="{\"type\":"+Arrays.toString(array)+"}";
-                    body="{\"type\":"+openList.toString()+"}";
+                    body="{\"type\":"+selectList.toString()+"}";
 
                     Log.d("bodyddddddd", body);
                 } catch (/*JSON*/Exception e) {
@@ -150,12 +196,14 @@ public class OpenedFragment extends Fragment {
                 Log.d("parsing", result);
                 parse(result);
 
+                adapter.setList(openList);
                 adapter.notifyDataSetChanged();
             } else {
-                adapter.removeAll();
+                adapter.setList(openList);
                 adapter.notifyDataSetChanged();
 
-                Toast.makeText(root.getContext(), openList.toString() + " boxes close success", Toast.LENGTH_SHORT).show();
+                Toast.makeText(root.getContext(), selectList.toString() + " boxes close success", Toast.LENGTH_SHORT).show();
+                selectList.clear();
             }
         }
     }
@@ -247,22 +295,17 @@ public class OpenedFragment extends Fragment {
         try{
             JSONObject object = new JSONObject(json);
             JSONObject jsonOpened = object.getJSONObject("Item");
-            Opened opened;
             String[] typeName = {"garbage", "paper", "plastic", "can", "glass", "vinyl"};
-
-            openList = new ArrayList<>();
 
             tvRegion.setText(jsonOpened.getString("region"));
 
             for(int i = 0; i < typeName.length ; i++) {
                 if(jsonOpened.getBoolean(typeName[i])){
-                    opened = new Opened(typeName[i]);
-
-                    adapter.addItem(opened);
-
                     openList.add(typeName[i]);
                 }
             }
+
+            Log.d("listtttttttttttt", openList.toString());
         } catch (JSONException e){
             e.printStackTrace();
         }

@@ -1,5 +1,7 @@
 package ericson.lg.mobile.earthas.ui.collection;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,6 +45,8 @@ public class CollectionFragment extends Fragment {
     private String selectType;
     private String body;
 
+    private AlertDialog.Builder builder;
+
     private View root;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -60,10 +64,25 @@ public class CollectionFragment extends Fragment {
         tvCaution = root.findViewById(R.id.text_caution);
         tvCollection = root.findViewById(R.id.text_collectionList);
 
+        builder = new AlertDialog.Builder(root.getContext());
+
         btnOpen.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                parsing();
+                builder.setMessage(selectType + " open")
+                        .setCancelable(false)
+                        .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                parsing();
+                            }
+                        })
+                        .setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        }).show();
             }
         });
 

@@ -73,7 +73,7 @@ public class ConfusionFragment extends Fragment {
 
     void parsing() {
         try {
-            //new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_list));
+            new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_list));
         } catch (Exception e) {
             e.printStackTrace();
         }

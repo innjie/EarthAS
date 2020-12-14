@@ -25,10 +25,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import ericson.lg.mobile.earthas.R;
+import ericson.lg.mobile.earthas.ui.confusion.ConfusionFragment;
 
 public class CollectionFragment extends Fragment {
     private Button btnOpen;
@@ -46,6 +48,9 @@ public class CollectionFragment extends Fragment {
     private String body;
 
     private AlertDialog.Builder builder;
+
+    private String apiAddress;
+    private String region;
 
     private View root;
 
@@ -238,9 +243,10 @@ public class CollectionFragment extends Fragment {
     }
 
     void parsing() {
+        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_open);
+        region = "seoul";
         try {
-            String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_open) + "seoul";
-            new RestAPITask().execute(url);
+            new RestAPITask().execute(apiAddress + URLEncoder.encode(region, "UTF-8"));
         } catch (Exception e) {
             e.printStackTrace();
         }

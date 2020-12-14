@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -44,6 +45,8 @@ public class ConfusionFragment extends Fragment {
     private Boolean find;
 
     private View root;
+
+    private String apiAddress;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -74,9 +77,10 @@ public class ConfusionFragment extends Fragment {
 
     void parsingList() {
         find = false;
+        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_list);
 
         try {
-            new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_list));
+            new RestAPITask().execute(apiAddress);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -84,9 +88,11 @@ public class ConfusionFragment extends Fragment {
 
     void parsingFind() {
         find = true;
+        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_find);
 
         try {
-            new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_find) + item);
+            new RestAPITask().execute(apiAddress + URLEncoder.encode(item, "UTF-8"));
+           // new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_find) + item);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -103,7 +109,7 @@ public class ConfusionFragment extends Fragment {
         @Override
         protected String doInBackground(String... Strings) {
             String result = null;
-
+Log.d("urllllllllllllll", Strings[0]);
             try {
                 result = downloadContents(Strings[0]);
 
@@ -120,7 +126,6 @@ public class ConfusionFragment extends Fragment {
         //작업 완료
         @Override
         protected void onPostExecute(String result) {
-            Log.d("parsing", result);
             parse(result);
 
             adapter.notifyDataSetChanged();
@@ -132,6 +137,7 @@ public class ConfusionFragment extends Fragment {
         HttpURLConnection conn = null;
         InputStream stream = null;
         String result = null;
+        Log.d("urllllllllllllll222222", address);
 
         try {
             URL url = new URL(address);

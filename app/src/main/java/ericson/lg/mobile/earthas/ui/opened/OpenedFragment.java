@@ -29,11 +29,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import ericson.lg.mobile.earthas.R;
+import ericson.lg.mobile.earthas.ui.collection.CollectionFragment;
 
 public class OpenedFragment extends Fragment {
     private Button btnAllClose;
@@ -52,6 +54,9 @@ public class OpenedFragment extends Fragment {
     private String body;
 
     private AlertDialog.Builder builder;
+
+    private String apiAddress;
+    private String region;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -124,23 +129,28 @@ public class OpenedFragment extends Fragment {
     }
 
     void parsingStatus() {
-        try {
-            status = true;
+        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_status);
+        status = true;
+        region = "seoul";
 
-            //String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_status) + URLEncoder.encode(query, "UTF-8");
-            String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_status) + "seoul";
-            new RestAPITask().execute(url);
+        try {
+            new RestAPITask().execute(apiAddress + URLEncoder.encode(region, "UTF-8"));
+            //String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_status) + "seoul";
+            //new RestAPITask().execute(url);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     void parsingClose() {
+        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_close);
         status = false;
+        region = "seoul";
 
         try {
-            String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_close) + "seoul";
-            new RestAPITask().execute(url);
+            new RestAPITask().execute(apiAddress + URLEncoder.encode(region, "UTF-8"));
+//            String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_close) + "seoul";
+  //          new RestAPITask().execute(url);
         } catch (Exception e) {
             e.printStackTrace();
         }

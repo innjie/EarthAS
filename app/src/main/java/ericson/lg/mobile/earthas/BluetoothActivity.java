@@ -8,10 +8,12 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,8 +23,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +35,9 @@ public class BluetoothActivity extends AppCompatActivity  {
     private Button btnConnect;
 
     private TextView tvStatus;
+
+    private ListView lvBluetooth;
+    private ArrayAdapter adapter;
 
     private Boolean isBluetoothOn = false;
 
@@ -64,6 +67,30 @@ public class BluetoothActivity extends AppCompatActivity  {
         tvStatus = findViewById(R.id.text_bluetooth_status);
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        lvBluetooth = findViewById(R.id.list_bluetooth);
+        listPairedDevices = new ArrayList<String>();
+        adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, listPairedDevices);
+        lvBluetooth.setAdapter(adapter);
+
+        lvBluetooth.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(BluetoothActivity.this);
+                builder.setTitle(listPairedDevices.get(i) + "에 연결하시겠습니까?")
+                        .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                connectSelectedDevice(listPairedDevices.get(i));
+                            }
+                        }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        }).show();
+            }
+        });
 
         fabOnOff.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -187,10 +214,19 @@ public class BluetoothActivity extends AppCompatActivity  {
                 pairedDevices = bluetoothAdapter.getBondedDevices();
 
                 if (pairedDevices.size() > 0) {
+                    listPairedDevices.clear();
+
+                    for (BluetoothDevice device : pairedDevices) {
+                        listPairedDevices.add(device.getName());
+                        //mListPairedDevices.add(device.getName() + "\n" + device.getAddress());
+                    }
+
+                    adapter.notifyDataSetChanged();
+
+                    /*
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("장치 선택");
 
-                    listPairedDevices = new ArrayList<String>();
                     for (BluetoothDevice device : pairedDevices) {
                         listPairedDevices.add(device.getName());
                         //mListPairedDevices.add(device.getName() + "\n" + device.getAddress());
@@ -206,6 +242,8 @@ public class BluetoothActivity extends AppCompatActivity  {
                     });
                     AlertDialog alert = builder.create();
                     alert.show();
+                    */
+
                 } else {
                     Toast.makeText(getApplicationContext(), "페어링된 장치가 없습니다.", Toast.LENGTH_LONG).show();
                 }
@@ -229,9 +267,12 @@ public class BluetoothActivity extends AppCompatActivity  {
             bluetoothSocket.connect();
             threadConnectedBluetooth = new ConnectedBluetoothThread(bluetoothSocket);
             threadConnectedBluetooth.start();
-            //bluetoothHandler.obtainMessage(BT_CONNECTING_STATUS, 1, -1).sendToTarget();
+            bluetoothHandler.obtainMessage(BT_CONNECTING_STATUS, 1, -1).sendToTarget();
         } catch (IOException e) {
             Toast.makeText(getApplicationContext(), "블루투스 연결 중 오류가 발생했습니다.", Toast.LENGTH_LONG).show();
         }
     }
+
+    //thread
+
 }

@@ -1,5 +1,6 @@
 package ericson.lg.mobile.earthas.ui.confusion;
 
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,7 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -26,6 +28,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -33,20 +37,20 @@ import ericson.lg.mobile.earthas.R;
 
 public class ConfusionFragment extends Fragment {
 
+    private Confusion confusion;
     private Button btnSearch;
-    private EditText etItem;
+    private ListView lvSearch;
+    private List<Confusion> confusionList;
+    private Cursor cursor;
+    private EditText editText;
+    private View root;
+    private ConfusionAdapter adapter;
     private String item;
-
     private RecyclerView recyclerConfusion;
     private LinearLayoutManager layoutManager;
+    private String url_list = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/unknownlist/list";
+    private String url_find = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/unknownlist/find?atValue=";
 
-    private ConfusionAdapter adapter;
-
-    private Boolean find;
-
-    private View root;
-
-    private String apiAddress;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -59,89 +63,76 @@ public class ConfusionFragment extends Fragment {
         adapter = new ConfusionAdapter();
         recyclerConfusion.setAdapter(adapter);
 
-        parsingList();
+        Log.d("onCreateView", "success in Confusion Fragment");
+        parseList();
 
-        etItem = root.findViewById(R.id.edit_item);
+        editText = root.findViewById(R.id.edit_item);
         btnSearch = root.findViewById(R.id.button_search);
         btnSearch.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
-                item = etItem.getText().toString();
-
-                parsingFind();
+                item = editText.getText().toString();
+                parseFind();
             }
         });
 
         return root;
     }
-
-    void parsingList() {
-        find = false;
-        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_list);
+    void parseList() {
+        String url = url_list;
 
         try {
-            new RestAPITask().execute(apiAddress);
+            new RestAPITask().execute(url);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    void parsingFind() {
-        find = true;
-        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_find);
+    void parseFind() {
+        String url = url_find;
 
         try {
-            new RestAPITask().execute(apiAddress + URLEncoder.encode(item, "UTF-8"));
-           // new RestAPITask().execute(root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_confusion_find) + item);
+            new RestAPITask().execute((url + URLEncoder.encode(item, "UTF-8")));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     class RestAPITask extends AsyncTask<String, Void, String> {
-
-        //수행 전
         @Override
         protected void onPreExecute() {
             adapter.clearItem();
         }
 
         @Override
-        protected String doInBackground(String... Strings) {
+        protected String doInBackground (String... Strings) {
             String result = null;
-Log.d("urllllllllllllll", Strings[0]);
+            Log.d("URL", Strings[0]);
+
             try {
                 result = downloadContents(Strings[0]);
-
-            }
-            catch (Exception e) {
-                // Error calling the rest api
-                Log.e("REST_API", "GET method failed: " + e.getMessage());
+            } catch (Exception e) {
+                Log.e("RestAPI", "GET Failed: " + e.getMessage());
                 e.printStackTrace();
             }
-
             return result;
         }
 
-        //작업 완료
         @Override
         protected void onPostExecute(String result) {
             parse(result);
-
             adapter.notifyDataSetChanged();
         }
     }
-
-    /* 주소(address)에 접속하여 문자열 데이터를 수신한 후 반환 */
     protected String downloadContents(String address) {
         HttpURLConnection conn = null;
         InputStream stream = null;
         String result = null;
-        Log.d("urllllllllllllll222222", address);
+        Log.d("URL", address);
 
         try {
             URL url = new URL(address);
-            conn = (HttpURLConnection)url.openConnection();
+            conn = (HttpURLConnection) url.openConnection();
             stream = getNetworkConnection(conn);
             result = readStreamToString(stream);
             if (stream != null) stream.close();
@@ -154,7 +145,6 @@ Log.d("urllllllllllllll", Strings[0]);
         }
         return result;
     }
-
     // URLConnection 을 전달받아 연결정보 설정 후 연결, 연결 후 수신한 InputStream 반환
     private InputStream getNetworkConnection(HttpURLConnection conn) throws Exception {
         // 클라이언트 아이디 및 시크릿 그리고 요청 URL 선언
@@ -194,24 +184,28 @@ Log.d("urllllllllllllll", Strings[0]);
         return result.toString();
     }
 
-    //json parsing
-    public void parse(String json){
-        try{
+    public void parse (String json) {
+        try {
             JSONObject object = new JSONObject(json);
-            JSONArray array = object.getJSONArray("Items");
-            JSONObject jsonConfusion;
+            JSONArray jArray = object.getJSONArray("Items");
+
+            Log.d("arrayLength", String.valueOf(jArray.length()));
+            JSONObject jConfusion;
             Confusion confusion;
 
-            for(int i = 0; i< array.length(); i++) {
-                jsonConfusion = array.getJSONObject(i);
+            for(int i = 0; i < jArray.length(); i++) {
+                jConfusion = jArray.getJSONObject(i);
                 confusion = new Confusion();
 
-                confusion.setName(jsonConfusion.getString("name"));
-                confusion.setType(jsonConfusion.getString("type"));
 
+                confusion.setName(jConfusion.getString("confusion_name"));
+                confusion.setType(jConfusion.getString("type"));
+
+//                confusion.setName(jConfusion.optString("name", "no result"));
+//                confusion.setType(jConfusion.optString("type", "no result"));
                 adapter.addItem(confusion);
             }
-        } catch (JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
         }
     }

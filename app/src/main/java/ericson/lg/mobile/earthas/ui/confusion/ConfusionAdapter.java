@@ -1,13 +1,9 @@
-//recycler 뷰 위한 어댑터
-
 package ericson.lg.mobile.earthas.ui.confusion;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,7 +15,6 @@ import java.util.ArrayList;
 import ericson.lg.mobile.earthas.R;
 
 public class ConfusionAdapter extends RecyclerView.Adapter<ConfusionAdapter.ItemViewHolder> {
-
     private ArrayList<Confusion> confusions = new ArrayList<>();
 
     @NonNull
@@ -40,41 +35,34 @@ public class ConfusionAdapter extends RecyclerView.Adapter<ConfusionAdapter.Item
     }
 
     void addItem(Confusion confusion) {
-        // 외부에서 item을 추가시킬 함수입니다.
         confusions.add(confusion);
     }
 
-    void clearItem(){
+    void clearItem() {
         confusions.clear();
     }
 
-    // RecyclerView의 핵심인 ViewHolder 입니다.
-    // 여기서 subView를 setting 해줍니다.
     class ItemViewHolder extends RecyclerView.ViewHolder {
-
-        private TextView tvName;
-        private TextView tvType;
+        private TextView recycleName;
+        private TextView recycleType;
 
         ItemViewHolder(View itemView) {
             super(itemView);
 
-            tvName = itemView.findViewById(R.id.text_name);
-            tvType = itemView.findViewById(R.id.text_type);
+            recycleName = itemView.findViewById(R.id.text_name);
+            recycleType = itemView.findViewById(R.id.text_type);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener( new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //int pos = getAdapterPosition();
-                    Toast.makeText(view.getContext(), tvName.getText()+" is "+tvType.getText(), Toast.LENGTH_SHORT).show();
-                    Log.d("Ddddddd",tvName.getText()+" is "+tvType.getText());
-
+                    Toast.makeText(view.getContext(), recycleName.getText() + " --- " + recycleType.getText(), Toast.LENGTH_SHORT).show();
+                    Log.d("adapter text", recycleName.getText() + " --- " + recycleType.getText());
                 }
             });
         }
-
         void onBind(Confusion confusion) {
-            tvName.setText(confusion.getName());
-            tvType.setText(confusion.getType());
+            recycleName.setText(confusion.getName());
+            recycleType.setText(confusion.getType());
         }
     }
 }

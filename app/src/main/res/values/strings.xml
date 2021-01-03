@@ -11,4 +11,11 @@
     <string name="title_glass">유리 병</string>
     <string name="title_plastic">플라스틱</string>
     <string name="title_vinyl">비닐</string>
+
+    <string name="url">https://l56kz1828f.execute-api.ap-northeast-2.amazonaws.com/EarthAS</string>
+    <string name="url_box_status">/collection-box/status/</string>
+    <string name="url_box_open">/collection-box/open/</string>
+    <string name="url_box_close">/collection-box/close/</string>
+    <string name="url_confusion_list">/confusion/list</string>
+    <string name="url_confusion_find">/confusion/find/</string>
 </resources>

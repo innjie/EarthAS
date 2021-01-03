@@ -9,10 +9,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import ericson.lg.mobile.earthas.R;
-import ericson.lg.mobile.earthas.ui.collection.CollectionFragment;
-import ericson.lg.mobile.earthas.ui.confusion.ConfusionFragment;
-import ericson.lg.mobile.earthas.ui.info.InfoFragment;
-import ericson.lg.mobile.earthas.ui.opened.OpenedFragment;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
@@ -33,21 +29,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
-        switch (position){
-            case 0:
-                InfoFragment infoFragment = new InfoFragment();
-                return infoFragment;
-            case 1:
-                CollectionFragment collectionFragment = new CollectionFragment();
-                return collectionFragment;
-            case 2:
-                ConfusionFragment confusionFragment = new ConfusionFragment();
-                return confusionFragment;
-            case 3:
-                OpenedFragment openedFragment = new OpenedFragment();
-                return openedFragment;
-        }
-        return PlaceholderFragment.newInstance(position + 1);
+        return PlaceholderFragment.newInstance(position);
     }
 
     @Nullable

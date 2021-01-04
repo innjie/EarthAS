@@ -1,4 +1,3 @@
-
 package ericson.lg.mobile.earthas.ui.opened;
 
 import android.content.Context;

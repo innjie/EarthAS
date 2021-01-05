@@ -149,8 +149,6 @@ public class OpenedFragment extends Fragment {
 
         try {
             new RestAPITask().execute(apiAddress + URLEncoder.encode(region, "UTF-8"));
-//            String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_close) + "seoul";
-  //          new RestAPITask().execute(url);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -98,6 +98,17 @@ public class ConfusionFragment extends Fragment {
         }
     }
 
+    void parseOpen() {
+        //find collection & parsing
+        String apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_open);
+        String region = "seoul";
+        try {
+            new RestAPITask().execute(apiAddress + URLEncoder.encode(region, "UTF-8"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     class RestAPITask extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
@@ -197,12 +208,9 @@ public class ConfusionFragment extends Fragment {
                 jConfusion = jArray.getJSONObject(i);
                 confusion = new Confusion();
 
+                confusion.setName(jConfusion.getJSONObject("confusion_name").getString("S"));
+                confusion.setType(jConfusion.getJSONObject("type").getString("S"));
 
-                confusion.setName(jConfusion.getString("confusion_name"));
-                confusion.setType(jConfusion.getString("type"));
-
-//                confusion.setName(jConfusion.optString("name", "no result"));
-//                confusion.setType(jConfusion.optString("type", "no result"));
                 adapter.addItem(confusion);
             }
         } catch (JSONException e) {

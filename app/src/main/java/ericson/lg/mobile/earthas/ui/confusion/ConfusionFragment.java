@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -25,6 +26,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -35,7 +37,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import ericson.lg.mobile.earthas.R;
 
-public class ConfusionFragment extends Fragment {
+public class ConfusionFragment extends Fragment implements  ConfusionParse{
 
     private Confusion confusion;
     private Button btnSearch;
@@ -48,6 +50,9 @@ public class ConfusionFragment extends Fragment {
     private String item;
     private RecyclerView recyclerConfusion;
     private LinearLayoutManager layoutManager;
+    private String func;
+    private String type;
+    private String body;
     private String url_list = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/unknownlist/list";
     private String url_find = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/unknownlist/find?atValue=";
 
@@ -60,7 +65,7 @@ public class ConfusionFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         recyclerConfusion.setLayoutManager(layoutManager);
 
-        adapter = new ConfusionAdapter();
+        adapter = new ConfusionAdapter( root.getContext(), this);
         recyclerConfusion.setAdapter(adapter);
 
         Log.d("onCreateView", "success in Confusion Fragment");
@@ -80,7 +85,7 @@ public class ConfusionFragment extends Fragment {
     }
     void parseList() {
         String url = url_list;
-
+        func = "";
         try {
             new RestAPITask().execute(url);
         } catch (Exception e) {
@@ -90,20 +95,22 @@ public class ConfusionFragment extends Fragment {
 
     void parseFind() {
         String url = url_find;
-
+        func = "";
         try {
             new RestAPITask().execute((url + URLEncoder.encode(item, "UTF-8")));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    void parseOpen() {
+    @Override
+    public void parseOpen(String type) {
         //find collection & parsing
-        String apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_open);
+        this.type = type.equals("general")? "general" : type;
+        func = "open";
+        String apiAddress = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/box/open";
         String region = "seoul";
         try {
-            new RestAPITask().execute(apiAddress + URLEncoder.encode(region, "UTF-8"));
+            new RestAPITask().execute(apiAddress + "?typeName=" + URLEncoder.encode(type, "UTF-8"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -112,7 +119,17 @@ public class ConfusionFragment extends Fragment {
     class RestAPITask extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
-            adapter.clearItem();
+            if(func.equals("open")) {
+                try {
+                    JSONObject json = new JSONObject();
+                    json.put("type", type);
+                    body = json.toString();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                adapter.clearItem();
+            }
         }
 
         @Override
@@ -131,8 +148,12 @@ public class ConfusionFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String result) {
-            parse(result);
-            adapter.notifyDataSetChanged();
+            if(func.equals("open")) {
+                Toast.makeText(root.getContext(), type + "opened", Toast.LENGTH_SHORT);
+            } else {
+                parse(result);
+                adapter.notifyDataSetChanged();
+            }
         }
     }
     protected String downloadContents(String address) {
@@ -159,12 +180,20 @@ public class ConfusionFragment extends Fragment {
     // URLConnection 을 전달받아 연결정보 설정 후 연결, 연결 후 수신한 InputStream 반환
     private InputStream getNetworkConnection(HttpURLConnection conn) throws Exception {
         // 클라이언트 아이디 및 시크릿 그리고 요청 URL 선언
-        conn.setRequestMethod("GET");
         conn.setConnectTimeout(5000);
         conn.setReadTimeout(5000);
         conn.setDoInput(true);
         conn.setRequestProperty("content-type", "application/json");
 
+        if(!func.equals("open")) {
+            conn.setRequestMethod("GET");
+        } else {
+            conn.setRequestMethod("PUT");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setDoOutput(true);
+
+            writeStream(conn);
+        }
         if (conn.getResponseCode() != HttpsURLConnection.HTTP_OK) {
             throw new IOException("HTTP error code: " + conn.getResponseCode());
         }
@@ -172,6 +201,16 @@ public class ConfusionFragment extends Fragment {
         return conn.getInputStream();
     }
 
+    protected void writeStream (HttpURLConnection conn) {
+        try  {
+            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+            wr.write(body);
+            wr.flush();
+            wr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     /* InputStream을 전달받아 문자열로 변환 후 반환 */
     protected String readStreamToString(InputStream stream){
         StringBuilder result = new StringBuilder();
@@ -179,7 +218,6 @@ public class ConfusionFragment extends Fragment {
         try {
             InputStreamReader inputStreamReader = new InputStreamReader(stream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
             String readLine = bufferedReader.readLine();
 
             while (readLine != null) {

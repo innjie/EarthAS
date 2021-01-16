@@ -60,6 +60,7 @@ public class OpenedFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
+        Log.d("in Opened Activity", "in Opened Activity");
         root = inflater.inflate(R.layout.fragment_opened, container, false);
 
         tvRegion = root.findViewById(R.id.text_region);
@@ -104,7 +105,7 @@ public class OpenedFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String type = openList.get(i);
 
-                Log.d("clickkkkkkkkkkk", type);
+                Log.d("clicked Item: ", type);
 
                 builder.setMessage(type + " close")
                         .setCancelable(false)
@@ -129,14 +130,12 @@ public class OpenedFragment extends Fragment {
     }
 
     void parsingStatus() {
-        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_status);
-        status = true;
+        apiAddress = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/box/find";
+        Log.d("status URL: ", apiAddress);
         region = "seoul";
 
         try {
-            new RestAPITask().execute(apiAddress + URLEncoder.encode(region, "UTF-8"));
-            //String url = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_status) + "seoul";
-            //new RestAPITask().execute(url);
+            new RestAPITask().execute(apiAddress );
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -161,19 +160,10 @@ public class OpenedFragment extends Fragment {
         protected void onPreExecute() {
             if(!status){
                 try {
-                    //String[] array = new String[openList.size()];
 
-                    //for(int i=0; i<array.length; i++){
-                    //    array[i] = openList.get(i);
-                    //}
-
-                    //JSONObject json = new JSONObject();
-                    //json.put("type", array);
-                    //body = json.toString();
-                    //body="{\"type\":"+Arrays.toString(array)+"}";
                     body="{\"type\":"+selectList.toString()+"}";
 
-                    Log.d("bodyddddddd", body);
+                    Log.d("body", body);
                 } catch (/*JSON*/Exception e) {
                     e.printStackTrace();
                 }
@@ -303,17 +293,18 @@ public class OpenedFragment extends Fragment {
         try{
             JSONObject object = new JSONObject(json);
             JSONObject jsonOpened = object.getJSONObject("Item");
-            String[] typeName = {"garbage", "paper", "plastic", "can", "glass", "vinyl"};
+            String[] typeName = {"general", "paper", "plastic", "can", "glass", "vinyl"};
 
             tvRegion.setText(jsonOpened.getString("region"));
 
             for(int i = 0; i < typeName.length ; i++) {
+                Log.d("in Iterator", typeName[i]);
                 if(jsonOpened.getBoolean(typeName[i])){
                     openList.add(typeName[i]);
                 }
             }
 
-            Log.d("listtttttttttttt", openList.toString());
+            Log.d("collection List", openList.toString());
         } catch (JSONException e){
             e.printStackTrace();
         }

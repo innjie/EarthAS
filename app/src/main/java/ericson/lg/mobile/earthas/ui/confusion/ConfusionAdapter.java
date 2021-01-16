@@ -1,5 +1,8 @@
 package ericson.lg.mobile.earthas.ui.confusion;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,8 +36,14 @@ public class ConfusionAdapter extends RecyclerView.Adapter<ConfusionAdapter.Item
     private ArrayList<Confusion> confusions = new ArrayList<>();
     private View root;
     String collectionName;
-    private String body;
+    private Context context;
+    private ConfusionParse collectionParse;
 
+    private AlertDialog.Builder builder;
+    ConfusionAdapter(Context context, ConfusionParse listener){
+        this.context = context;
+        this.collectionParse = listener;
+    }
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -77,8 +86,21 @@ public class ConfusionAdapter extends RecyclerView.Adapter<ConfusionAdapter.Item
                     //get item's type
                     collectionName = recycleType.getText().toString();
 
+                    builder = new AlertDialog.Builder(context);
+                    builder.setMessage(recycleType.getText().toString() + " open")
+                            .setCancelable(false)
+                            .setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    collectionParse.parseOpen(collectionName);
+                                }
+                            })
+                            .setNegativeButton("취소", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
 
-                    Toast.makeText(view.getContext(), recycleName.getText() + " --- " + recycleType.getText(), Toast.LENGTH_SHORT).show();
+                                }
+                            }).show();
                     Log.d("adapter text", recycleName.getText() + " --- " + recycleType.getText());
                 }
             });

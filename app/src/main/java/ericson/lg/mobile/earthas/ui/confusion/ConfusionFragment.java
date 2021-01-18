@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,7 +29,6 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -50,11 +48,12 @@ public class ConfusionFragment extends Fragment implements  ConfusionParse{
     private String item;
     private RecyclerView recyclerConfusion;
     private LinearLayoutManager layoutManager;
-    private String func;
+    private String state;
     private String type;
     private String body;
     private String url_list = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/unknownlist/list";
     private String url_find = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/unknownlist/find?atValue=";
+    private String url_open = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/box/open";
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -85,7 +84,7 @@ public class ConfusionFragment extends Fragment implements  ConfusionParse{
     }
     void parseList() {
         String url = url_list;
-        func = "";
+        state = "parseList";
         try {
             new RestAPITask().execute(url);
         } catch (Exception e) {
@@ -95,19 +94,20 @@ public class ConfusionFragment extends Fragment implements  ConfusionParse{
 
     void parseFind() {
         String url = url_find;
-        func = "";
+        state = "parseFind";
         try {
             new RestAPITask().execute((url + URLEncoder.encode(item, "UTF-8")));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     @Override
     public void parseOpen(String type) {
         //find collection & parsing
         this.type = type.equals("general")? "general" : type;
-        func = "open";
-        String apiAddress = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/box/open";
+        state = "open";
+        String apiAddress = url_open;
         String region = "seoul";
         try {
             new RestAPITask().execute(apiAddress + "?typeName=" + URLEncoder.encode(type, "UTF-8"));
@@ -119,7 +119,7 @@ public class ConfusionFragment extends Fragment implements  ConfusionParse{
     class RestAPITask extends AsyncTask<String, Void, String> {
         @Override
         protected void onPreExecute() {
-            if(func.equals("open")) {
+            if(state.equals("open")) {
                 try {
                     JSONObject json = new JSONObject();
                     json.put("type", type);
@@ -148,7 +148,7 @@ public class ConfusionFragment extends Fragment implements  ConfusionParse{
 
         @Override
         protected void onPostExecute(String result) {
-            if(func.equals("open")) {
+            if(state.equals("open")) {
                 Toast.makeText(root.getContext(), type + "opened", Toast.LENGTH_SHORT);
             } else {
                 parse(result);
@@ -185,7 +185,7 @@ public class ConfusionFragment extends Fragment implements  ConfusionParse{
         conn.setDoInput(true);
         conn.setRequestProperty("content-type", "application/json");
 
-        if(!func.equals("open")) {
+        if(!state.equals("open")) {
             conn.setRequestMethod("GET");
         } else {
             conn.setRequestMethod("PUT");
@@ -238,7 +238,6 @@ public class ConfusionFragment extends Fragment implements  ConfusionParse{
             JSONObject object = new JSONObject(json);
             JSONArray jArray = object.getJSONArray("Items");
 
-            Log.d("arrayLength", String.valueOf(jArray.length()));
             JSONObject jConfusion;
             Confusion confusion;
 

@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -60,7 +61,6 @@ public class OpenedFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        Log.d("in Opened Activity", "in Opened Activity");
         root = inflater.inflate(R.layout.fragment_opened, container, false);
 
         tvRegion = root.findViewById(R.id.text_region);
@@ -105,8 +105,6 @@ public class OpenedFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String type = openList.get(i);
 
-                Log.d("clicked Item: ", type);
-
                 builder.setMessage(type + " close")
                         .setCancelable(false)
                         .setPositiveButton("확인", new DialogInterface.OnClickListener() {
@@ -129,9 +127,10 @@ public class OpenedFragment extends Fragment {
         return root;
     }
 
+    //get Collection Status to set on adapter
     void parsingStatus() {
         apiAddress = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/box/find";
-        Log.d("status URL: ", apiAddress);
+        status = true;
         region = "seoul";
 
         try {
@@ -142,7 +141,7 @@ public class OpenedFragment extends Fragment {
     }
 
     void parsingClose() {
-        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_close);
+        apiAddress = "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/box/close";
         status = false;
         region = "seoul";
 
@@ -290,19 +289,29 @@ public class OpenedFragment extends Fragment {
 
     //json parsing
     public void parse(String json){
+        Log.d("in", "parse");
         try{
             JSONObject object = new JSONObject(json);
-            JSONObject jsonOpened = object.getJSONObject("Item");
-            String[] typeName = {"general", "paper", "plastic", "can", "glass", "vinyl"};
+            JSONArray jsonOpened = object.getJSONArray("Items");
+            String[] typeName = {"paper", "vinyl", "glass", "plastic", "general", "can"};
+            Log.d("collectionParse", "in Opened Fragment parse method");
 
-            tvRegion.setText(jsonOpened.getString("region"));
+            JSONObject openObject;
 
-            for(int i = 0; i < typeName.length ; i++) {
-                Log.d("in Iterator", typeName[i]);
-                if(jsonOpened.getBoolean(typeName[i])){
-                    openList.add(typeName[i]);
+            for(int i = 0; i < jsonOpened.length(); i++) {
+                openObject = jsonOpened.getJSONObject(i);
+                for(int j = 0; j < typeName.length ; j++) {
+
+                    if(openObject.getBoolean(typeName[j])){
+                        Log.d("typeName", typeName[j] + " " +
+                                openObject.getBoolean(typeName[j]));
+                        openList.add(typeName[j]);
+                    }
                 }
+
             }
+
+
 
             Log.d("collection List", openList.toString());
         } catch (JSONException e){

@@ -53,10 +53,11 @@ public class CollectionFragment extends Fragment {
     private String region;
 
     private View root;
-
+    private String url_open;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_collection, container, false);
+        url_open =  "https://dbibkwfit6.execute-api.us-east-2.amazonaws.com/earthAS/box/open";
 
         btnOpen = root.findViewById(R.id.button_open);
         btnGarbage = root.findViewById(R.id.button_garbage);
@@ -243,8 +244,8 @@ public class CollectionFragment extends Fragment {
     }
 
     void parsing() {
-        apiAddress = root.getResources().getString(R.string.url) + root.getResources().getString(R.string.url_box_open);
-        region = "seoul";
+        apiAddress = url_open;
+        region = "Seoul";
         try {
             new RestAPITask().execute(apiAddress + URLEncoder.encode(region, "UTF-8"));
         } catch (Exception e) {
